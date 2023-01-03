@@ -32,8 +32,15 @@ var app = http.createServer(function(request,response){
         // });
         db.query(`SELECT * FROM topic`, (err, topics) => {
           console.log(topics);
+          var title = 'Welcome!';
+          var description = 'Hello, Node.js';
+          var list = template.list(topics);
+          var html = template.HTML(title, list,
+            `<h2>${title}</h2>${description}`,
+            `<a herf="/create">create</a>`);
+          
           response.writeHead(200);
-          response.end('Success');
+          response.end(html);
         });
       } else {
         fs.readdir('./data', function(error, filelist){
