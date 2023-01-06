@@ -129,12 +129,13 @@ var app = http.createServer(function (request, response) {
         var html = template.HTML(title, list, `
         <h2>${title}</h2>
         <form action="/update_process" method="post">
-        <p><input type="text" name="title" placeholder="title"></p>
+        <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
         <p>
-        <textarea name="description" placeholder="description"></textarea>
+        <textarea name="description" placeholder="description">${topic[0].description}</textarea>
         </p>
         <p>
         <input type="submit">
+        <input type="hidden" value="${queryData.id}" name="id" />
         </p>
         </form>
         `, '');
@@ -152,12 +153,24 @@ var app = http.createServer(function (request, response) {
       var id = post.id;
       var title = post.title;
       var description = post.description;
-      fs.rename(`data/${id}`, `data/${title}`, function (error) {
-        fs.writeFile(`data/${title}`, description, 'utf8', function (err) {
-          response.writeHead(302, { Location: `/?id=${title}` });
-          response.end();
-        })
-      });
+      console.log('post', post);
+      // fs.rename(`data/${id}`, `data/${title}`, function (error) {
+      //   fs.writeFile(`data/${title}`, description, 'utf8', function (err) {
+      //     response.writeHead(302, { Location: `/?id=${title}` });
+      //     response.end();
+      //   })
+      // });
+      db.query(`
+        UPDATE topic
+        SET title = '${title}', description = '${description}'
+        WHERE id = ${id};`,(err, res) => {
+          if(err) throw err;
+          console.log(res);
+          response.writeHead(302, {Location: `/?id=${title}`});
+        }
+        )
+        response.writeHead(302, {Location:`/?id=${id}`});
+        response.end();
     });
   } else if (pathname === '/delete_process') {
     var body = '';
